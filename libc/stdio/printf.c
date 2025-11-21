@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 static bool print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
@@ -12,7 +13,8 @@ static bool print(const char* data, size_t length) {
 	return true;
 }
 
-int printf(const char* restrict format, ...) {
+int printf(const char* restrict format, ...) 
+{
 	va_list parameters;
 	va_start(parameters, format);
 
@@ -27,9 +29,10 @@ int printf(const char* restrict format, ...) {
 			size_t amount = 1;
 			while (format[amount] && format[amount] != '%')
 				amount++;
+
 			if (maxrem < amount) {
+				return (EOVERFLOW);
 				// TODO: Set errno to EOVERFLOW.
-				return -1;
 			}
 			if (!print(format, amount))
 				return -1;
@@ -45,7 +48,7 @@ int printf(const char* restrict format, ...) {
 			char c = (char) va_arg(parameters, int /* char promotes to int */);
 			if (!maxrem) {
 				// TODO: Set errno to EOVERFLOW.
-				return -1;
+				return (EOVERFLOW);
 			}
 			if (!print(&c, sizeof(c)))
 				return -1;
@@ -55,8 +58,8 @@ int printf(const char* restrict format, ...) {
 			const char* str = va_arg(parameters, const char*);
 			size_t len = strlen(str);
 			if (maxrem < len) {
+				return (EOVERFLOW);
 				// TODO: Set errno to EOVERFLOW.
-				return -1;
 			}
 			if (!print(str, len))
 				return -1;
@@ -66,7 +69,7 @@ int printf(const char* restrict format, ...) {
 			size_t len = strlen(format);
 			if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
-				return -1;
+				return (EOVERFLOW);
 			}
 			if (!print(format, len))
 				return -1;
