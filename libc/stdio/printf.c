@@ -46,7 +46,7 @@ int printf(const char* restrict format, ...) {
 		const char* format_begun_at = format++;
 		
 		switch (*format) {
-		case 'c':
+		case 'c': {
 			format++;
 			char c = (char) va_arg(parameters, int /* char promotes to int */);
 			if (!maxrem) {
@@ -59,8 +59,9 @@ int printf(const char* restrict format, ...) {
 
 			written++;
 			break;
+		}
 
-		case 's':
+		case 's': {
 			format++;
 			const char* str = va_arg(parameters, const char*);
 			size_t len = strlen(str);
@@ -73,20 +74,40 @@ int printf(const char* restrict format, ...) {
 			written += len;
 		
 			break;
-			
-		case 'd':
+		}
+
+		case 'd': {
 			format++;
-			char d = (char) ('0' + va_arg(parameters, int));
-			if (!maxrem)
-				return (-1); /* TODO: set to EOVERFLOW */
+			int d = va_arg(parameters, int);
 			
-			if (!print(&d, sizeof(d)))
-				return (-1);
-			
-			written++;
+			int arr[100];
+			int digits = 0; /* Number of digits */
+			int r; /* Leftover value */
+
+			while (d != 0) {
+
+				r = d % 10;
+				arr[digits] = r;
+				digits++;
+				
+				d = d / 10;
+			}
+
+			for (int i = digits - 1; i > -1; i--) {
+				if (!maxrem)
+					return (-1); /* Buffer overflow */
+				
+				char digit = (char) ('0' + arr[i]);
+				if (!print(&digit, sizeof(digit)))
+					return (-1);
+				
+				written++;
+			}
+
 			break;
-			
-		default:
+		}
+
+		default: {
 			format = format_begun_at;
 			size_t length = strlen(format);
 			if (maxrem < length) {
@@ -97,6 +118,8 @@ int printf(const char* restrict format, ...) {
 				return -1;
 			written += length;
 			format += length;
+		}
+
 		}
 	}
 
