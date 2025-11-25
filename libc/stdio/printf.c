@@ -32,7 +32,6 @@ static bool print(const char* data, size_t length) {
 /* TODO: track written chars, and add error checking */
 int printf(const char* restrict format, ...)
 {
-	char *traverse; 
     char *s; /* string holder*/
     char *num; /* int/hex/oct holder */
 	int val; /* Temp num holder as int type */
