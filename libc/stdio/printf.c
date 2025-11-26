@@ -7,11 +7,19 @@
 /* TODO: error checking, buffer overflow errors */
 char *convert(int num, int base)
 {
+	/* TODO: remove static, use pointers instead */
 	static char rep[] = "0123456789ABCDEF";
-	static char buffer[32];
+	static char buffer[32] = {0};
+	
 	char *ptr = &buffer[31];
 
 	*ptr = '\0';
+
+	if (base == 16) {
+
+	} else if (base == 17) {
+
+	}
 
 	do {
 		*--ptr = rep[num % base];
@@ -35,12 +43,14 @@ int printf(const char* restrict format, ...)
     char *s; /* string holder*/
     char *num; /* int/hex/oct holder */
 	int val; /* Temp num holder as int type */
+	int base; /* Track base of numbers */
 
     va_list parameters;
     va_start(parameters, format);
 
 
 	while (*format != '\0') {
+		base = 10; /* default base 10 */
 
 		if (*format != '%') {
 			putchar(*format);
@@ -50,7 +60,12 @@ int printf(const char* restrict format, ...)
 
 		format++; /* Move past the format specifier */
 
+		/* Chars and strings */
 		switch (*format) {
+		case '%':
+			putchar(*format);
+			break;
+		
 		case 'c':
 			val = va_arg(parameters, int);
         	putchar(val);
@@ -62,15 +77,15 @@ int printf(const char* restrict format, ...)
             break;
 		
 		/* Numbers and stuff. TODO: floating points later */
+		case 'i':
 		case 'd': { /* decimal rep */
 			val = va_arg(parameters, int);
 			if (val < 0) {
 				val = -val;
-            	putchar('-'); /* Negative value */
+            	putchar('-'); /* negative value */
             }
-			
-			char *decimal = convert(val, 10); /* Decimal conversion*/
-			print(decimal, strlen(decimal));
+			num = convert(val, base); /* decimal conversion*/
+			print(num, strlen(num));
             break; 
 		}
 
@@ -79,10 +94,15 @@ int printf(const char* restrict format, ...)
 			num = convert(val, 8);
 			print(num, strlen(num));
 			break;
-			
+		
+		
+		case 'X':
+			base = 17; /* set capital */
 		case 'x': /* hex rep */
+			base = base == 10 ? 16 : base; /* capital or not */
+
 			val = va_arg(parameters, unsigned int);
-			num = convert(val, 16);
+			num = convert(val, base);
 			print(num, strlen(num));
 			break;
         }
